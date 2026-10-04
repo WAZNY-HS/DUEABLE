@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>__BRAND_NAME__ | __BRAND_TAGLINE__</title>
+    <meta name="description" content="__BRAND_DESCRIPTION__" />
+    <meta name="author" content="__BRAND_AUTHOR__" />
+    <meta name="theme-color" content="__BRAND_BG_LIGHT__" />
+    <link rel="icon" type="image/svg+xml" href="__BRAND_FAVICON__" />
+    <script>
+      // Apply the saved/system theme before first paint to avoid a flash.
+      try {
+        var t = JSON.parse(localStorage.getItem('__BRAND_THEME_KEY__'))
+        if (t !== 'light' && t !== 'dark') {
+          t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+        }
+        document.documentElement.dataset.theme = t
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
+  </body>
+</html>

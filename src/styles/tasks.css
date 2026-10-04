@@ -1,0 +1,190 @@
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.task {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-1);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--surface);
+  box-shadow: var(--shadow-sm);
+  animation: reveal var(--dur) var(--ease);
+  transition: border-color var(--dur-fast) var(--ease), background-color var(--dur) var(--ease);
+  /* Skip rendering off-screen rows: keeps 500+ tasks smooth. */
+  content-visibility: auto;
+  contain-intrinsic-size: auto 76px;
+}
+
+.task:hover {
+  border-color: var(--accent);
+}
+
+.task--editing {
+  display: block;
+  padding: var(--space-4);
+  border-color: var(--accent);
+}
+
+.task__body {
+  flex: 1;
+  min-width: 0;
+  padding-block: var(--space-2);
+}
+
+.task__title {
+  font-weight: 700;
+  overflow-wrap: anywhere;
+  transition: color var(--dur) var(--ease);
+}
+
+.task__notes {
+  margin-top: var(--space-1);
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.task__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-top: var(--space-2);
+}
+
+.task__actions {
+  display: flex;
+  flex: none;
+}
+
+.task--done .task__title {
+  color: var(--text-muted);
+  text-decoration: line-through;
+  text-decoration-thickness: 2px;
+}
+
+.task--done .task__notes,
+.task--done .task__meta {
+  opacity: 0.65;
+}
+
+/* Animated checkbox (visually hidden native input keeps full keyboard support) */
+.check {
+  position: relative;
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+  cursor: pointer;
+}
+
+.check input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.check__box {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border: 2px solid var(--text-muted);
+  border-radius: 8px;
+  color: #fff;
+  transition: background-color var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease),
+    transform var(--dur-fast) var(--ease);
+}
+
+.check__box path {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 3;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: 24;
+  stroke-dashoffset: 24;
+  transition: stroke-dashoffset var(--dur) var(--ease) 60ms;
+}
+
+.check:hover .check__box {
+  border-color: var(--accent);
+}
+
+.check:active .check__box {
+  transform: scale(0.88);
+}
+
+.check input:checked + .check__box {
+  border-color: transparent;
+  background: var(--brand-gradient);
+}
+
+.check input:checked + .check__box path {
+  stroke-dashoffset: 0;
+}
+
+.check input:focus-visible + .check__box {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  padding: 2px var(--space-2);
+  border-radius: var(--radius-full);
+  background: var(--surface-2);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.badge--subject {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.badge--priority-high {
+  background: var(--overdue-soft);
+  color: var(--overdue-ink);
+}
+
+.badge--priority-medium {
+  background: var(--warn-soft);
+  color: var(--warn-ink);
+}
+
+.badge--priority-low {
+  background: var(--surface-2);
+  color: var(--text-muted);
+}
+
+.badge--priority-high,
+.badge--priority-medium,
+.badge--priority-low {
+  text-transform: capitalize;
+}
+
+.badge--overdue {
+  background: var(--overdue-soft);
+  color: var(--overdue-ink);
+}
+
+.badge--today {
+  background: var(--success-soft);
+  color: var(--success-ink);
+}
