@@ -1,17 +1,33 @@
 import { createContext, useContext, useEffect, useMemo, useReducer } from 'react'
 import brand from '../config/brand'
 import { useLocalStorage } from '../hooks/useLocalStorage'
-import { createTask, countTasks, filterTasks, sanitizeTasks, sortTasks, FILTERS } from '../utils/tasks'
+import {
+  FILTERS,
+  countTasks,
+  createTask,
+  filterTasks,
+  makeId,
+  sanitizeTasks,
+  sortTasks,
+  todayISO,
+} from '../utils/tasks'
 import { initialTaskState, taskReducer } from './taskReducer'
 
 export const STORAGE_KEY = `${brand.storageNamespace}:tasks:v1`
+const VIEWS = ['list', 'calendar']
+const SORT_MODES = ['smart', 'manual']
 
 const TaskStateContext = createContext(null)
 const TaskActionsContext = createContext(null)
 
 function sanitizeStored(raw) {
   if (!raw || typeof raw !== 'object') return null
-  return { tasks: sanitizeTasks(raw.tasks), filter: FILTERS.includes(raw.filter) ? raw.filter : 'all' }
+  return {
+    tasks: sanitizeTasks(raw.tasks),
+    filter: FILTERS.includes(raw.filter) ? raw.filter : 'all',
+    view: VIEWS.includes(raw.view) ? raw.view : 'list',
+    sortMode: SORT_MODES.includes(raw.sortMode) ? raw.sortMode : 'smart',
+  }
 }
 
 /**
@@ -19,26 +35,24 @@ function sanitizeStored(raw) {
  * useLocalStorage call below with a fetch/sync layer; components stay untouched.
  */
 export function TaskProvider({ children }) {
-  const [stored, setStored] = useLocalStorage(
-    STORAGE_KEY,
-    { tasks: [], filter: 'all' },
-    { sanitize: sanitizeStored },
-  )
+  const [stored, setStored] = useLocalStorage(STORAGE_KEY, initialTaskState, { sanitize: sanitizeStored })
   const [state, dispatch] = useReducer(taskReducer, { ...initialTaskState, ...stored })
+  const { tasks, filter, query, view, sortMode } = state
 
   useEffect(() => {
-    setStored({ tasks: state.tasks, filter: state.filter })
-  }, [state.tasks, state.filter, setStored])
+    setStored({ tasks, filter, view, sortMode })
+  }, [tasks, filter, view, sortMode, setStored])
 
-  const counts = useMemo(() => countTasks(state.tasks), [state.tasks])
-  const visibleTasks = useMemo(
-    () => sortTasks(filterTasks(state.tasks, state.filter, state.query)),
-    [state.tasks, state.filter, state.query],
-  )
+  const counts = useMemo(() => countTasks(tasks), [tasks])
+  const subjects = useMemo(() => [...new Set(tasks.map((t) => t.subject).filter(Boolean))].sort(), [tasks])
+  const visibleTasks = useMemo(() => {
+    const matching = filterTasks(tasks, filter, query)
+    return sortMode === 'manual' ? matching : sortTasks(matching)
+  }, [tasks, filter, query, sortMode])
 
   const stateValue = useMemo(
-    () => ({ filter: state.filter, query: state.query, counts, visibleTasks }),
-    [state.filter, state.query, counts, visibleTasks],
+    () => ({ tasks, filter, query, view, sortMode, counts, subjects, visibleTasks }),
+    [tasks, filter, query, view, sortMode, counts, subjects, visibleTasks],
   )
 
   const actions = useMemo(
@@ -46,10 +60,14 @@ export function TaskProvider({ children }) {
       add: (values) => dispatch({ type: 'ADD', task: createTask(values) }),
       update: (id, changes) => dispatch({ type: 'UPDATE', id, changes, now: Date.now() }),
       remove: (id) => dispatch({ type: 'DELETE', id }),
-      toggle: (id) => dispatch({ type: 'TOGGLE', id, now: Date.now() }),
-      restore: (tasks) => dispatch({ type: 'RESTORE', tasks }),
-      setFilter: (filter) => dispatch({ type: 'SET_FILTER', filter }),
-      setQuery: (query) => dispatch({ type: 'SET_QUERY', query }),
+      toggle: (id) => dispatch({ type: 'TOGGLE', id, now: Date.now(), nextId: makeId(), today: todayISO() }),
+      toggleSubtask: (id, subtaskId) => dispatch({ type: 'TOGGLE_SUBTASK', id, subtaskId, now: Date.now() }),
+      reorder: (id, overId) => dispatch({ type: 'REORDER', id, overId }),
+      restore: (restored) => dispatch({ type: 'RESTORE', tasks: restored }),
+      setFilter: (next) => dispatch({ type: 'SET_FILTER', filter: next }),
+      setQuery: (next) => dispatch({ type: 'SET_QUERY', query: next }),
+      setView: (next) => dispatch({ type: 'SET_VIEW', view: next }),
+      setSortMode: (next) => dispatch({ type: 'SET_SORT', sortMode: next }),
       clearCompleted: () => dispatch({ type: 'CLEAR_COMPLETED' }),
     }),
     [],

@@ -86,4 +86,20 @@ describe('Dueable core flows', () => {
     expect(screen.getByText('Math homework')).toBeInTheDocument()
     expect(screen.queryByText('History quiz')).not.toBeInTheDocument()
   })
+
+  it('adds subtasks, ticks them off, and shows the task on the calendar', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+    await user.type(screen.getByLabelText('New task title'), 'Group project')
+    await user.click(screen.getByRole('button', { name: /More options/ }))
+    await user.type(screen.getByLabelText('Subtasks'), 'Slides{Enter}')
+    await user.type(screen.getByLabelText('Due date'), '2026-10-12')
+    await user.click(screen.getByRole('button', { name: 'Add task' }))
+
+    await user.click(screen.getByRole('checkbox', { name: 'Slides' }))
+    expect(screen.getByRole('checkbox', { name: 'Slides' })).toBeChecked()
+
+    await user.click(screen.getByRole('button', { name: 'Calendar' }))
+    expect(screen.getByRole('region', { name: 'Calendar' })).toBeInTheDocument()
+  })
 })

@@ -1,14 +1,29 @@
 export const PRIORITIES = ['low', 'medium', 'high']
 export const FILTERS = ['all', 'pending', 'completed']
-export const LIMITS = { title: 120, subject: 30, notes: 500 }
+export const REPEATS = ['none', 'daily', 'weekly', 'monthly']
+export const LIMITS = { title: 120, subject: 30, notes: 500, subtask: 80, subtasks: 20 }
 
 const PRIORITY_RANK = { high: 0, medium: 1, low: 2 }
 
-const generateId = () =>
+export const makeId = () =>
   globalThis.crypto?.randomUUID?.() ?? `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+
+function normalizeSubtasks(raw) {
+  if (!Array.isArray(raw)) return []
+  return raw
+    .filter((s) => s && typeof s.title === 'string' && s.title.trim())
+    .slice(0, LIMITS.subtasks)
+    .map((s) => ({
+      id: typeof s.id === 'string' ? s.id : makeId(),
+      title: s.title.trim().slice(0, LIMITS.subtask),
+      done: s.done === true,
+    }))
+}
 
 export function normalizeValues(values) {
   return {
+    repeat: REPEATS.includes(values.repeat) ? values.repeat : 'none',
+    subtasks: normalizeSubtasks(values.subtasks),
     title: (values.title ?? '').trim(),
     subject: (values.subject ?? '').trim(),
     notes: (values.notes ?? '').trim(),
@@ -26,7 +41,7 @@ export function validateTaskInput(values) {
 }
 
 export function createTask(values, now = Date.now()) {
-  return { ...normalizeValues(values), id: generateId(), completed: false, createdAt: now, updatedAt: now }
+  return { ...normalizeValues(values), id: makeId(), completed: false, createdAt: now, updatedAt: now }
 }
 
 const isValidTask = (t) =>
@@ -118,3 +133,46 @@ export function formatDueDate(iso, today) {
 }
 
 export const truncate = (text, max) => (text.length > max ? `${text.slice(0, max - 1)}…` : text)
+
+export function subtaskProgress(task) {
+  const done = task.subtasks.reduce((n, s) => n + (s.done ? 1 : 0), 0)
+  return { done, total: task.subtasks.length }
+}
+
+/** Next occurrence for a repeating task; monthly clamps to the month's last day (31 Jan -> 28 Feb). */
+export function nextDueDate(iso, repeat) {
+  const [y, m, d] = iso.split('-').map(Number)
+  if (repeat === 'daily') return toISODate(new Date(y, m - 1, d + 1))
+  if (repeat === 'weekly') return toISODate(new Date(y, m - 1, d + 7))
+  const lastDay = new Date(y, m + 1, 0).getDate()
+  return toISODate(new Date(y, m, Math.min(d, lastDay)))
+}
+
+/** Stable hue (0-359) per subject so each subject keeps its own colour. */
+export function subjectHue(subject) {
+  let hash = 0
+  for (const ch of subject.toLowerCase()) hash = (hash * 31 + ch.codePointAt(0)) % 360
+  return hash
+}
+
+export function groupByDueDate(tasks) {
+  const groups = new Map()
+  for (const task of tasks) {
+    if (!task.dueDate) continue
+    groups.set(task.dueDate, [...(groups.get(task.dueDate) ?? []), task])
+  }
+  return groups
+}
+
+/** Reminder text for pending tasks that are due today or overdue; null when nothing needs attention. */
+export function dueSummary(tasks, today) {
+  let dueToday = 0
+  let overdue = 0
+  for (const task of tasks) {
+    const status = getDueStatus(task, today)
+    if (status === 'today') dueToday += 1
+    else if (status === 'overdue') overdue += 1
+  }
+  if (!dueToday && !overdue) return null
+  return [dueToday && `${dueToday} due today`, overdue && `${overdue} overdue`].filter(Boolean).join(' · ')
+}

@@ -1,0 +1,240 @@
+/* Header, view controls, subtasks, subject colours, manual ordering, calendar */
+.header__actions {
+  display: flex;
+  align-items: center;
+  flex: none;
+}
+
+.view-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.hint--always {
+  display: flex;
+  text-align: center;
+}
+
+.segmented--two {
+  grid-template-columns: repeat(2, 1fr);
+  min-width: 14rem;
+}
+
+.link-btn--on {
+  background: var(--accent-soft);
+}
+
+select.input {
+  appearance: auto;
+}
+
+/* Subtask editor (inside the form) */
+.subtask-editor {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0 0 var(--space-1);
+  padding: 0;
+  list-style: none;
+}
+
+.subtask-editor li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding-left: var(--space-3);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  overflow-wrap: anywhere;
+}
+
+/* Subtask checklist (on the task) */
+.subtasks {
+  margin: var(--space-1) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.subtask {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
+  font-size: var(--text-sm);
+  cursor: pointer;
+  overflow-wrap: anywhere;
+}
+
+.subtask input {
+  flex: none;
+  width: 20px;
+  height: 20px;
+  margin: 0;
+  accent-color: var(--accent);
+}
+
+.subtask--done span {
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+.badge--cap {
+  text-transform: capitalize;
+}
+
+/* Subject colour: each subject gets its own hue (--h is set inline) */
+.badge--subject {
+  background: hsl(var(--h) 90% 55% / 0.14);
+  color: hsl(var(--h) 65% 24%);
+}
+
+[data-theme='dark'] .badge--subject {
+  background: hsl(var(--h) 90% 65% / 0.18);
+  color: hsl(var(--h) 90% 80%);
+}
+
+/* Manual ordering */
+.drag-handle {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 32px;
+  height: var(--tap);
+  padding: 0;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--text-muted);
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.drag-handle:hover {
+  color: var(--text);
+  background: var(--surface-2);
+}
+
+.drag-handle--active {
+  cursor: grabbing;
+  color: var(--accent-ink);
+}
+
+.task--drop-target {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* Calendar */
+.calendar {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.calendar__nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+}
+
+.calendar__month {
+  font-size: var(--text-lg);
+  font-weight: 800;
+}
+
+.calendar__nav-actions {
+  display: flex;
+  align-items: center;
+}
+
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: var(--space-1);
+}
+
+.calendar__weekday {
+  padding-bottom: var(--space-1);
+  text-align: center;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-muted);
+}
+
+.calendar__day {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: var(--tap);
+  aspect-ratio: 1;
+  padding: 0;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  transition: background-color var(--dur-fast) var(--ease);
+}
+
+.calendar__day:hover {
+  background: var(--surface-2);
+}
+
+.calendar__day--today {
+  border-color: var(--accent);
+}
+
+.calendar__day[aria-pressed='true'] {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+  border-color: var(--accent);
+}
+
+.calendar__count {
+  min-width: 1.4em;
+  padding: 0 4px;
+  border-radius: var(--radius-full);
+  font-size: 0.6875rem;
+  font-weight: 800;
+  line-height: 1.5;
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+.calendar__count--overdue {
+  background: var(--overdue-soft);
+  color: var(--overdue-ink);
+}
+
+.calendar__count--done {
+  background: var(--success-soft);
+  color: var(--success-ink);
+}
+
+.calendar__agenda {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+  padding-top: var(--space-3);
+  border-top: 1px solid var(--border);
+}
+
+.calendar__agenda-title {
+  font-size: var(--text-base);
+  font-weight: 800;
+}
+
+.calendar__empty {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}

@@ -1,5 +1,7 @@
 import brand from '../config/brand'
+import InstallButton from './InstallButton'
 import Logo from './Logo'
+import ReminderToggle from './ReminderToggle'
 import ThemeToggle from './ThemeToggle'
 
 export default function Header() {
@@ -12,7 +14,11 @@ export default function Header() {
           <p className="brand__tagline">{brand.tagline}</p>
         </div>
       </div>
-      <ThemeToggle />
+      <div className="header__actions">
+        <InstallButton />
+        <ReminderToggle />
+        <ThemeToggle />
+      </div>
     </header>
   )
 }

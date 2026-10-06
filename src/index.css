@@ -2,6 +2,7 @@
 @import './styles/layout.css';
 @import './styles/ui.css';
 @import './styles/tasks.css';
+@import './styles/features.css';
 
 /* Brand palette defaults. src/config/brand.js overrides these at runtime (applyBrand.js). */
 :root {
